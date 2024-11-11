@@ -2,13 +2,13 @@ return {
     "stevearc/conform.nvim",
     event = { "BufReadPre", "BufNewFile" },
     config = function()
+
         local conform = require("conform")
 
         conform.setup({
             formatters_by_ft = {
                 c = { "my_formatter" },
                 cpp = { "my_formatter" },
-                lua = { "my_formatter" },
             },
             format_on_save = {
                 lsp_fallback = true,
@@ -17,10 +17,10 @@ return {
             },
             formatters = {
                 my_formatter = {
-                    command = "clang-format",
-                    args = '--style="{BasedOnStyle: Microsoft}"',
-                },
-            }
+                    command = 'clang-format',
+                    args = '--style="{BasedOnStyle: Microsoft,AlignConsecutiveDeclarations: true}"',
+                }
+            },
         })
         vim.keymap.set({ "n", "v" }, "<leader>f", function()
             conform.format({
@@ -31,3 +31,4 @@ return {
         end, { desc = "Format file or range (in visual mode)" })
     end,
 }
+
