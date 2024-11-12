@@ -22,6 +22,7 @@ autocmd('LspAttach', {
             end
                 vim.cmd("wincmd l")
                 vim.lsp.buf.definition() 
+                vim.cmd("normal zz")
         end, opts)
         vim.keymap.set("n", "gD", function() vim.lsp.buf.implementation() end , opts)
         vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, opts)

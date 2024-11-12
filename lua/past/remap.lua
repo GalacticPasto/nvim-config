@@ -25,6 +25,16 @@ vim.keymap.set("i", "<C-c>", "<Esc>")
 
 vim.keymap.set("n", "Q", "<nop>")
 
+vim.keymap.set("n", "<C-h>", 
+    function()
+        vim.cmd("wincmd h")
+    end
+)
+vim.keymap.set("n", "<C-l>", 
+    function()
+        vim.cmd("wincmd l")
+    end
+)
 vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz")
 vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz")
 vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz")
@@ -45,8 +55,9 @@ vim.keymap.set("n", "<leader>x", function()
     then
         vim.cmd("vnew")
         vim.cmd("wincmd h")
+        vim.cmd("setlocal buftype=nofile")
         buffer = vim.api.nvim_get_current_buf()
-        vim.cmd(":vertical resize 100");
+        vim.cmd(":vertical resize 80");
     end
     vim.api.nvim_buf_set_lines(buffer,0,-1,false,{"output of: build.sh"})
     vim.fn.jobstart({"./build.sh"},{
@@ -131,9 +142,12 @@ vim.keymap.set("n", "<leader>D", function()
     vim.cmd("!cd build && gf2 ./*")
 end)
 
+vim.keymap.set("n", "<leader>=", function()
+    vim.cmd("vertical resize 220")
+end)
 
 vim.keymap.set("n", "<leader><leader>", function()
-    vim.cmd("so")
+    vim.cmd("noh")
 end)
 
 
