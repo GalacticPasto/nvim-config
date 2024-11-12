@@ -76,70 +76,96 @@ vim.keymap.set("n", "<leader>x", function()
     vim.cmd("wincmd l")
 end)
 
-local function find_executable()
-    --
-    -- List all files in the directory
+local function find_executables()
+    -- List all files in the 'build' directory
     local files = vim.fn.readdir("build")
-    -- Try to find the executable (you can adjust this filter for your needs)
-    for _, file in ipairs(files) do
+    local executables = {}
 
-        -- Assuming executable files do not have an extension, or you can filter on specific extensions
-        if file:match("^[^%.]+$") then  -- Match files without an extension (adjust as needed)
-            return file  -- Return the first executable found
+    -- Iterate through the files and collect those without an extension
+    for _, file in ipairs(files) do
+        if file:match("^[^%.]+$") then  -- Match files without an extension
+            table.insert(executables, file)  -- Add to the executables list
         end
     end
 
-    -- If no executable is found, return nil
-    return nil
+    -- Return the list of executables (empty if none found)
+    return executables
 end
 
 vim.keymap.set("n", "<leader>r", function()
-     vim.cmd("wincmd h");
-     local executable = find_executable()
-        if executable then
-            -- Print the name of the executable to debug
-            print("Found executable: " .. executable)
-            
-            local executable_path = vim.fn.expand("%:p:h") .. "/build/" .. executable
-            -- Split window to the left
-            vim.cmd("wincmd h")
+    vim.cmd("wincmd h");
+    local executables = find_executables()
 
-            -- Get the current buffer number
-            local buffer = vim.api.nvim_get_current_buf()
+    local executable = executables[1]
+    if executable then
+        -- Print the name of the executable to debug
+        print("Found executable: " .. executable)
 
-            -- Set initial lines in the buffer (e.g., placeholder text for the output)
-            vim.api.nvim_buf_set_lines(buffer, -1, -1, false, {"Output of executable:"})
+        local executable_path = vim.fn.expand("%:p:h") .. "/build/" .. executable
+        -- Split window to the left
+        vim.cmd("wincmd h")
 
-            -- Start the job to run the executable
-            vim.fn.jobstart({"" .. executable_path}, {
-                stdout_buffered = true,  -- Ensure output is buffered for easier reading
-                on_stdout = function(_, data)
-                    if data then
-                        -- Append output to the buffer
-                        vim.api.nvim_buf_set_lines(buffer, -1, -1, false, data)
-                    end
-                end,
-                on_stderr = function(_, data)
-                    if data then
-                        -- Handle error output similarly
-                        vim.api.nvim_buf_set_lines(buffer, -1, -1, false,data)
-                    end
-                end,
-                on_exit = function(_, data)
-                    -- Optionally handle exit code if needed
-                    if data then
-                        vim.api.nvim_buf_set_lines(buffer, -1, -1, false,data)
-                    end
-                end,
-            })
-        else
-            print("No executable found in the 'build' directory.")
-        end  
+        -- Get the current buffer number
+        local buffer = vim.api.nvim_get_current_buf()
+
+        -- Set initial lines in the buffer (e.g., placeholder text for the output)
+        vim.api.nvim_buf_set_lines(buffer, -1, -1, false, {"Output of executable:"})
+
+        -- Start the job to run the executable
+        vim.fn.jobstart({"" .. executable_path}, {
+            stdout_buffered = true,  -- Ensure output is buffered for easier reading
+            on_stdout = function(_, data)
+                if data then
+                    -- Append output to the buffer
+                    vim.api.nvim_buf_set_lines(buffer, -1, -1, false, data)
+                end
+            end,
+            on_stderr = function(_, data)
+                if data then
+                    -- Handle error output similarly
+                    vim.api.nvim_buf_set_lines(buffer, -1, -1, false,data)
+                end
+            end,
+            on_exit = function(_, data)
+                -- Optionally handle exit code if needed
+                if data then
+                    vim.api.nvim_buf_set_lines(buffer, -1, -1, false,data)
+                end
+            end,
+        })
+    else
+        print("No executable found in the 'build' directory.")
+    end  
     vim.cmd("wincmd l")
 end)
 
 vim.keymap.set("n", "<leader>D", function()
-    vim.cmd("!cd build && gf2 ./*")
+    local presentBuffer = vim.api.nvim_get_current_buf()
+    vim.cmd("wincmd h")
+    local buffer = vim.api.nvim_get_current_buf()
+    if presentBuffer == buffer
+    then
+        vim.cmd("vnew")
+        vim.cmd("wincmd h")
+        vim.cmd("setlocal buftype=nofile")
+        buffer = vim.api.nvim_get_current_buf()
+        vim.cmd(":vertical resize 80");
+    end
+    local executables = find_executables()
+        for i, exec in ipairs(executables) do
+            vim.api.nvim_buf_set_lines(buffer, -1, -1, false, {i .. "." .. exec})
+            vim.cmd("redraw")
+        end
+        local choice = tonumber(vim.fn.input("Enter the number of the executable you want to run: "))
+
+        if choice and choice >= 1 and choice <= #executables 
+        then
+            local executable = executables[choice]
+            local executable_path = vim.fn.expand("%:p:h") .. "/build/" .. executable
+            vim.cmd("!gf2 " .. executable)
+        else
+            print("Invalid choice. Please enter a valid number.")
+        end
 end)
 
 vim.keymap.set("n", "<leader>=", function()
