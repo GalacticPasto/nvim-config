@@ -36,10 +36,18 @@ end)
 
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
 
+
 vim.keymap.set("n", "<leader>x", function()
-    vim.cmd("vnew")
-    vim.cmd(":vertical resize 100");
+    local presentBuffer = vim.api.nvim_get_current_buf()
+    vim.cmd("wincmd h")
     local buffer = vim.api.nvim_get_current_buf()
+    if presentBuffer == buffer
+    then
+        vim.cmd("vnew")
+        vim.cmd("wincmd h")
+        buffer = vim.api.nvim_get_current_buf()
+        vim.cmd(":vertical resize 100");
+    end
     vim.api.nvim_buf_set_lines(buffer,0,-1,false,{"output of: build.sh"})
     vim.fn.jobstart({"./build.sh"},{
         stdout_buffered = true,
@@ -116,24 +124,7 @@ vim.keymap.set("n", "<leader>r", function()
         else
             print("No executable found in the 'build' directory.")
         end  
-       -- --vim.cmd("windcmd, l")
-       -- vim.cmd("cd build")
-       -- vim.cmd("wincmd h")
-       -- local buffer = vim.api.nvim_get_current_buf()
-       -- vim.api.nvim_buf_set_lines(buffer,0,-1,false,{"output of: Executable"})
-       -- vim.fn.jobstart({"./",},{
-       --     stdout_buffered = true,
-       --     on_stdout = function(_,data)
-       --         if data then
-       --             vim.api.nvim_buf_set_lines(buffer,-1,-1,false,data)
-       --         end
-       --     end,
-       --     on_stderr = function(_,data)
-       --         if data then
-       --             vim.api.nvim_buf_set_lines(buffer,-1,-1,false,data)
-       --         end
-       --     end,
-       -- })
+    vim.cmd("wincmd l")
 end)
 
 vim.keymap.set("n", "<leader>D", function()

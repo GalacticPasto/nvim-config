@@ -13,9 +13,15 @@ autocmd('LspAttach', {
     callback = function(e)
         local opts = { buffer = e.buf }
         vim.keymap.set("n", "gd", function() 
-            vim.cmd("vs")
+            local presentBuffer = vim.api.nvim_get_current_buf()
             vim.cmd("wincmd l")
-            vim.lsp.buf.definition() 
+            local buffer = vim.api.nvim_get_current_buf()
+            if presentBuffer == buffer
+            then
+                vim.cmd("vs")
+            end
+                vim.cmd("wincmd l")
+                vim.lsp.buf.definition() 
         end, opts)
         vim.keymap.set("n", "gD", function() vim.lsp.buf.implementation() end , opts)
         vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, opts)
