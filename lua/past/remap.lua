@@ -15,22 +15,22 @@ vim.keymap.set("n", "N", "Nzzzv")
 vim.keymap.set("x", "<leader>p", [["_dP]])
 
 -- next greatest remap ever : asbjornHaland
-vim.keymap.set({"n", "v"}, "<leader>y", [["+y]])
+vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
 vim.keymap.set("n", "<leader>Y", [["+Y]])
 
-vim.keymap.set({"n", "v"}, "<leader>d", [["_d]])
+vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
 
 -- This is going to get me cancelled
 vim.keymap.set("i", "<C-c>", "<Esc>")
 
 vim.keymap.set("n", "Q", "<nop>")
 
-vim.keymap.set("n", "<C-h>", 
+vim.keymap.set("n", "<C-h>",
     function()
         vim.cmd("wincmd h")
     end
 )
-vim.keymap.set("n", "<C-l>", 
+vim.keymap.set("n", "<C-l>",
     function()
         vim.cmd("wincmd l")
     end
@@ -59,17 +59,17 @@ vim.keymap.set("n", "<leader>x", function()
         buffer = vim.api.nvim_get_current_buf()
         vim.cmd(":vertical resize 80");
     end
-    vim.api.nvim_buf_set_lines(buffer,0,-1,false,{"output of: build.sh"})
-    vim.fn.jobstart({"./build.sh"},{
+    vim.api.nvim_buf_set_lines(buffer, 0, -1, false, { "output of: build.sh" })
+    vim.fn.jobstart({ "./build.sh" }, {
         stdout_buffered = true,
-        on_stdout = function(_,data)
+        on_stdout = function(_, data)
             if data then
-                vim.api.nvim_buf_set_lines(buffer,-1,-1,false,data)
+                vim.api.nvim_buf_set_lines(buffer, -1, -1, false, data)
             end
         end,
-        on_stderr = function(_,data)
+        on_stderr = function(_, data)
             if data then
-                vim.api.nvim_buf_set_lines(buffer,-1,-1,false,data)
+                vim.api.nvim_buf_set_lines(buffer, -1, -1, false, data)
             end
         end,
     })
@@ -77,14 +77,14 @@ vim.keymap.set("n", "<leader>x", function()
 end)
 
 local function find_executables()
-    -- List all files in the 'build' directory
-    local files = vim.fn.readdir("build")
+    -- List all files in the 'bin' directory
+    local files = vim.fn.readdir("bin")
     local executables = {}
 
     -- Iterate through the files and collect those without an extension
     for _, file in ipairs(files) do
-        if file:match("^[^%.]+$") then  -- Match files without an extension
-            table.insert(executables, file)  -- Add to the executables list
+        if file:match("^[^%.]+$") then      -- Match files without an extension
+            table.insert(executables, file) -- Add to the executables list
         end
     end
 
@@ -101,7 +101,7 @@ vim.keymap.set("n", "<leader>r", function()
         -- Print the name of the executable to debug
         print("Found executable: " .. executable)
 
-        local executable_path = vim.fn.expand("%:p:h") .. "/build/" .. executable
+        local executable_path = vim.fn.expand("%:p:h") .. "/bin/" .. executable
         -- Split window to the left
         vim.cmd("wincmd h")
 
@@ -109,11 +109,11 @@ vim.keymap.set("n", "<leader>r", function()
         local buffer = vim.api.nvim_get_current_buf()
 
         -- Set initial lines in the buffer (e.g., placeholder text for the output)
-        vim.api.nvim_buf_set_lines(buffer, -1, -1, false, {"Output of executable:"})
+        vim.api.nvim_buf_set_lines(buffer, -1, -1, false, { "Output of executable:" })
 
         -- Start the job to run the executable
-        vim.fn.jobstart({"" .. executable_path}, {
-            stdout_buffered = true,  -- Ensure output is buffered for easier reading
+        vim.fn.jobstart({ "" .. executable_path }, {
+            stdout_buffered = true, -- Ensure output is buffered for easier reading
             on_stdout = function(_, data)
                 if data then
                     -- Append output to the buffer
@@ -123,19 +123,20 @@ vim.keymap.set("n", "<leader>r", function()
             on_stderr = function(_, data)
                 if data then
                     -- Handle error output similarly
-                    vim.api.nvim_buf_set_lines(buffer, -1, -1, false,data)
+                    vim.api.nvim_buf_set_lines(buffer, -1, -1, false, data)
                 end
             end,
             on_exit = function(_, data)
                 -- Optionally handle exit code if needed
                 if data then
-                    vim.api.nvim_buf_set_lines(buffer, -1, -1, false,data)
+                    vim.api.nvim_buf_set_lines(buffer, -1, -1, false, data)
                 end
+                vim.cmd("redraw")
             end,
         })
     else
-        print("No executable found in the 'build' directory.")
-    end  
+        print("No executable found in the 'bin' directory.")
+    end
     vim.cmd("wincmd l")
 end)
 
@@ -152,20 +153,20 @@ vim.keymap.set("n", "<leader>D", function()
         vim.cmd(":vertical resize 80");
     end
     local executables = find_executables()
-        for i, exec in ipairs(executables) do
-            vim.api.nvim_buf_set_lines(buffer, -1, -1, false, {i .. "." .. exec})
-            vim.cmd("redraw")
-        end
-        local choice = tonumber(vim.fn.input("Enter the number of the executable you want to run: "))
+    for i, exec in ipairs(executables) do
+        vim.api.nvim_buf_set_lines(buffer, -1, -1, false, { i .. "." .. exec })
+        vim.cmd("redraw")
+    end
+    local choice = tonumber(vim.fn.input("Enter the number of the executable you want to run: "))
 
-        if choice and choice >= 1 and choice <= #executables 
-        then
-            local executable = executables[choice]
-            local executable_path = vim.fn.expand("%:p:h") .. "/build/" .. executable
-            vim.cmd("!gf2 " .. executable)
-        else
-            print("Invalid choice. Please enter a valid number.")
-        end
+    if choice and choice >= 1 and choice <= #executables
+    then
+        local executable = executables[choice]
+        local executable_path = vim.fn.expand("%:p:h") .. "/bin/" .. executable
+        vim.cmd("!gf2 " .. executable_path)
+    else
+        print("Invalid choice. Please enter a valid number.")
+    end
 end)
 
 vim.keymap.set("n", "<leader>=", function()
@@ -176,4 +177,10 @@ vim.keymap.set("n", "<leader><leader>", function()
     vim.cmd("noh")
 end)
 
-
+--latex
+--
+vim.keymap.set("n", "<LL>", function()
+    local fullPath = vim.fn.expand("%:p")
+    local pdfFile = vim.fn.subsitute(fullPath, ".tex", ".pdf", "")
+    vim.cmd("!zathura " .. pdfFile .. "' &")
+end)

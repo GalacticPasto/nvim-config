@@ -8,11 +8,13 @@ local pastGroup = augroup('PastGroup', {})
 
 local autocmd = vim.api.nvim_create_autocmd
 
+
+
 autocmd('LspAttach', {
     group = pastGroup,
     callback = function(e)
         local opts = { buffer = e.buf }
-        vim.keymap.set("n", "gd", function() 
+        vim.keymap.set("n", "gd", function()
             local presentBuffer = vim.api.nvim_get_current_buf()
             vim.cmd("wincmd l")
             local buffer = vim.api.nvim_get_current_buf()
@@ -20,11 +22,11 @@ autocmd('LspAttach', {
             then
                 vim.cmd("vs")
             end
-                vim.cmd("wincmd l")
-                vim.lsp.buf.definition() 
-                vim.cmd("normal zz")
+            vim.cmd("wincmd l")
+            vim.lsp.buf.definition()
+            vim.cmd("normal zz")
         end, opts)
-        vim.keymap.set("n", "gD", function() vim.lsp.buf.implementation() end , opts)
+        vim.keymap.set("n", "gD", function() vim.lsp.buf.implementation() end, opts)
         vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, opts)
         vim.keymap.set("n", "<leader>vws", function() vim.lsp.buf.workspace_symbol() end, opts)
         vim.keymap.set("n", "<leader>vd", function() vim.diagnostic.open_float() end, opts)
@@ -36,5 +38,3 @@ autocmd('LspAttach', {
         vim.keymap.set("n", "]d", function() vim.diagnostic.goto_prev() end, opts)
     end
 })
-
-
