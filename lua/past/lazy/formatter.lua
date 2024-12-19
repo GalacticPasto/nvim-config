@@ -2,13 +2,10 @@ return {
     "stevearc/conform.nvim",
     event = { "BufReadPre", "BufNewFile" },
     config = function()
-
         local conform = require("conform")
 
         conform.setup({
             formatters_by_ft = {
-                c = { "my_formatter" },
-                cpp = { "my_formatter" },
             },
             format_on_save = {
                 lsp_fallback = true,
@@ -31,4 +28,3 @@ return {
         end, { desc = "Format file or range (in visual mode)" })
     end,
 }
-
